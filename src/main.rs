@@ -3,6 +3,8 @@ mod lua;
 
 use std::{error::Error, path::PathBuf};
 
+const DEFAULT_CONFIG_DIRECTORY: &str = "/etc/carbide";
+
 fn main() -> Result<(), Box<dyn Error>> {
     let matches = cli::get_matches();
     match matches.subcommand() {
@@ -10,7 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let config_directory = PathBuf::from(
                 subcommand
                     .get_one::<String>("config-directory")
-                    .expect("Missing config directory"),
+                    .unwrap_or(&String::from(DEFAULT_CONFIG_DIRECTORY)),
             );
 
             let actions = lua::load(config_directory)?;
@@ -18,11 +20,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         Some(("generation", subcommand)) => match subcommand.subcommand() {
             Some(("list", _)) => todo!(),
-            Some(("delete", subcommand)) => todo!(),
+            Some(("delete", _)) => todo!(),
             Some(("clean", _)) => todo!(),
-            _ => todo!(),
+            _ => {}
         },
-        _ => todo!(),
+        _ => {}
     }
 
     Ok(())

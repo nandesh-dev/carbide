@@ -9,7 +9,6 @@ pub fn get_matches() -> ArgMatches {
                     Arg::new("config-directory")
                         .long("config-directory")
                         .short('c')
-                        .default_value("/etc/carbide")
                         .help("Set configuration directory path"),
                 ),
         )
