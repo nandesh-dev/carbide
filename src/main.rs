@@ -1,9 +1,11 @@
 mod cli;
+mod generations;
 mod lua;
 
 use std::{error::Error, path::PathBuf};
 
 const DEFAULT_CONFIG_DIRECTORY: &str = "/etc/carbide";
+const DEFAULT_STORAGE_DIRECTORY: &str = "/local/carbide";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let matches = cli::get_matches();
@@ -15,8 +17,17 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap_or(&String::from(DEFAULT_CONFIG_DIRECTORY)),
             );
 
-            let actions = lua::load(config_directory)?;
-            dbg!(actions);
+            let config = lua::parse_config(config_directory)?;
+            let generation = generations::models::Generation::from_lua_config(0, config)?;
+
+            dbg!(&generation);
+
+            generation.write(PathBuf::from("temp/out"))?;
+
+            let generation2 =
+                generations::models::Generation::from_file(PathBuf::from("temp/out"))?;
+
+            dbg!(generation2);
         }
         Some(("generation", subcommand)) => match subcommand.subcommand() {
             Some(("list", _)) => todo!(),

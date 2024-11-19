@@ -6,7 +6,7 @@ use std::{
 
 use mlua::{Lua, LuaOptions, Result, StdLib, Table};
 
-pub fn load(directory: PathBuf) -> Result<Vec<models::Action>> {
+pub fn parse_config(directory: PathBuf) -> Result<models::Config> {
     let actions = Arc::new(Mutex::new(Vec::<models::Action>::new()));
 
     let mlua = Lua::new_with(StdLib::PACKAGE, LuaOptions::new())?;
@@ -101,13 +101,18 @@ pub fn load(directory: PathBuf) -> Result<Vec<models::Action>> {
     mlua.load(init_script).set_name("init.lua").exec()?;
 
     let actions = actions.lock().unwrap().clone();
-    Ok(actions)
+    Ok(models::Config { actions })
 }
 
 pub mod models {
     use std::path::PathBuf;
 
     use mlua::{FromLua, IntoLua, Lua, Value};
+
+    #[derive(Debug)]
+    pub struct Config {
+        pub actions: Vec<Action>,
+    }
 
     #[derive(Debug, Clone)]
     pub enum Action {
