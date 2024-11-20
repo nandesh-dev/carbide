@@ -15,7 +15,7 @@ pub fn get_matches() -> ArgMatches {
                     Arg::new("data-directory")
                         .long("data-directory")
                         .short('d')
-                        .help("Set storage directory path"),
+                        .help("Set data directory path"),
                 ),
         )
         .subcommand(
@@ -27,7 +27,7 @@ pub fn get_matches() -> ArgMatches {
                             Arg::new("data-directory")
                                 .long("data-directory")
                                 .short('d')
-                                .help("Set storage directory path"),
+                                .help("Set data directory path"),
                         ),
                 )
                 .subcommand(
@@ -38,7 +38,7 @@ pub fn get_matches() -> ArgMatches {
                             Arg::new("data-directory")
                                 .long("data-directory")
                                 .short('d')
-                                .help("Set storage directory path"),
+                                .help("Set data directory path"),
                         ),
                 )
                 .subcommand(
@@ -46,7 +46,7 @@ pub fn get_matches() -> ArgMatches {
                         Arg::new("data-directory")
                             .long("data-directory")
                             .short('d')
-                            .help("Set storage directory path"),
+                            .help("Set data directory path"),
                     ),
                 )
                 .subcommand_required(true),
