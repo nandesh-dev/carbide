@@ -60,13 +60,6 @@ pub fn read_last_generation(path: &PathBuf) -> io::Result<models::Generation> {
                     highest_id = id
                 }
             }
-            if !file_name_regex.is_match(file_name) {
-                continue;
-            }
-
-            file_name_regex.captures(file_name);
-
-            return Ok(models::Generation::from_file(path)?);
         }
     }
 
