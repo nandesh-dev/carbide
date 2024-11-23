@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap_or(&String::from(DEFAULT_CONFIG_DIRECTORY)),
             );
 
-            let config = lua::parse_config(config_directory)?;
+            let config = lua::parse_config(&config_directory)?;
             let current_generation =
                 generations::models::Generation::from_lua_config(0, Local::now(), config)?;
 
