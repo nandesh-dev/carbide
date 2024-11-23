@@ -3,7 +3,7 @@ use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use std::{fs, io, path::PathBuf};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Generation {
     pub id: i32,
     pub creation_datetime: DateTime<Local>,
@@ -102,20 +102,20 @@ impl Generation {
         })
     }
 
-    pub fn write(self, path: PathBuf) -> io::Result<()> {
+    pub fn write(&self, path: PathBuf) -> io::Result<()> {
         let file = fs::File::create(path)?;
         bincode::serialize_into(file, &self)
             .map_err(|err| io::Error::new(io::ErrorKind::Other, format!("Bincode error: {}", err)))
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct File {
     pub path: PathBuf,
     pub content: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Script {
     pub install: Vec<String>,
     pub update: Vec<String>,

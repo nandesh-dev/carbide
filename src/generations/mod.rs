@@ -2,6 +2,8 @@ use regex::Regex;
 use std::{fs, io, path::PathBuf};
 
 pub mod models;
+#[cfg(test)]
+mod tests;
 
 pub fn read_generations(path: &PathBuf) -> io::Result<Vec<models::Generation>> {
     let mut generations: Vec<models::Generation> = Vec::new();
