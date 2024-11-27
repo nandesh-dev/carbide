@@ -26,17 +26,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             let config = lua::parse_config(&config_directory)?;
             let current_generation =
-                generations::models::Generation::from_lua_config(0, Local::now(), config)?;
+                generations::models::Generation::from_lua_config(&config, 0, &Local::now())?;
 
             match generations::read_last_generation(&data_directory) {
                 Ok(last_generation) => {
                     current_generation.write(
-                        data_directory.join(format!("carbide-{}", last_generation.id + 1)),
+                        &data_directory.join(format!("carbide-{}", last_generation.id + 1)),
                     )?;
                 }
                 Err(err) => match err.kind() {
                     io::ErrorKind::NotFound => {
-                        current_generation.write(data_directory.join("carbide-0"))?;
+                        current_generation.write(&data_directory.join("carbide-0"))?;
                     }
                     _ => return Err(Box::new(err)),
                 },

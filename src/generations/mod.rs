@@ -23,7 +23,7 @@ pub fn read_generations(path: &PathBuf) -> io::Result<Vec<models::Generation>> {
                 continue;
             }
 
-            generations.push(models::Generation::from_file(path)?)
+            generations.push(models::Generation::from_file(&path)?)
         }
     }
 
@@ -35,7 +35,7 @@ pub fn read_generations(path: &PathBuf) -> io::Result<Vec<models::Generation>> {
 pub fn read_last_generation(path: &PathBuf) -> io::Result<models::Generation> {
     let mut highest_id = -1;
 
-    for entry in fs::read_dir(&path)? {
+    for entry in fs::read_dir(path)? {
         let entry = entry?;
         let path = entry.path();
 
@@ -71,6 +71,6 @@ pub fn read_last_generation(path: &PathBuf) -> io::Result<models::Generation> {
     }
 
     Ok(models::Generation::from_file(
-        path.join(PathBuf::from(format!("carbide-{}", highest_id))),
+        &path.join(PathBuf::from(format!("carbide-{}", highest_id))),
     )?)
 }

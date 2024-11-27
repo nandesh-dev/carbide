@@ -9,6 +9,8 @@ use crate::lua;
 #[test]
 fn generation_read_write() {
     let storage_directory = assert_fs::TempDir::new().unwrap();
+    let path = storage_directory.join("carbide-0");
+
     let generation = Generation {
         id: 1,
         creation_datetime: Local::now(),
@@ -23,14 +25,9 @@ fn generation_read_write() {
         }],
     };
 
-    generation
-        .write(storage_directory.join("carbide-0"))
-        .unwrap();
+    generation.write(&path).unwrap();
 
-    assert_eq!(
-        generation,
-        Generation::from_file(storage_directory.join("carbide-0")).unwrap()
-    )
+    assert_eq!(generation, Generation::from_file(&path).unwrap())
 }
 
 #[test]
@@ -61,7 +58,7 @@ fn generation_from_lua_config() {
     };
 
     let creation_datetime = Local::now();
-    let generation = Generation::from_lua_config(0, creation_datetime, config).unwrap();
+    let generation = Generation::from_lua_config(&config, 0, &creation_datetime).unwrap();
 
     assert_eq!(
         generation,
@@ -108,7 +105,7 @@ fn read_generations() {
     };
 
     generation_0
-        .write(storage_directory.join("carbide-0"))
+        .write(&storage_directory.join("carbide-0"))
         .unwrap();
 
     let generation_1 = Generation {
@@ -126,11 +123,11 @@ fn read_generations() {
     };
 
     generation_1
-        .write(storage_directory.join("carbide-1"))
+        .write(&storage_directory.join("carbide-1"))
         .unwrap();
 
     assert_eq!(
-        generations::read_generations(&PathBuf::from(storage_directory.path())).unwrap(),
+        generations::read_generations(&storage_directory.to_path_buf()).unwrap(),
         vec![generation_0, generation_1]
     )
 }
@@ -150,7 +147,7 @@ fn read_last_generation() {
     };
 
     generation_0
-        .write(storage_directory.join("carbide-0"))
+        .write(&storage_directory.join("carbide-0"))
         .unwrap();
 
     let generation_1 = Generation {
@@ -168,11 +165,11 @@ fn read_last_generation() {
     };
 
     generation_1
-        .write(storage_directory.join("carbide-1"))
+        .write(&storage_directory.join("carbide-1"))
         .unwrap();
 
     assert_eq!(
-        generations::read_last_generation(&PathBuf::from(storage_directory.path())).unwrap(),
+        generations::read_last_generation(&storage_directory.to_path_buf()).unwrap(),
         generation_1
     )
 }
