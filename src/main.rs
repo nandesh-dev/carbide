@@ -1,4 +1,5 @@
 mod cli;
+mod difference;
 mod generations;
 mod lua;
 
