@@ -12,6 +12,15 @@ pub struct Generation {
 }
 
 impl Generation {
+    pub fn new() -> Self {
+        Self {
+            id: -1,
+            creation_datetime: Local::now(),
+            files: Vec::new(),
+            scripts: Vec::new(),
+        }
+    }
+
     pub fn from_file(path: &PathBuf) -> io::Result<Self> {
         let file = fs::File::open(path)?;
         bincode::deserialize_from(file)
@@ -103,7 +112,11 @@ impl Generation {
     }
 
     pub fn write(&self, path: &PathBuf) -> io::Result<()> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
         let file = fs::File::create(path)?;
+
         bincode::serialize_into(file, &self)
             .map_err(|err| io::Error::new(io::ErrorKind::Other, format!("Bincode error: {}", err)))
     }

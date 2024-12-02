@@ -3,12 +3,17 @@ mod difference;
 mod generations;
 mod lua;
 
-use std::{error::Error, io, path::PathBuf};
+use std::{
+    error::Error,
+    fs::{remove_file, File, OpenOptions},
+    io::{self, Write},
+    path::PathBuf,
+};
 
 use chrono::Local;
 
 const DEFAULT_CONFIG_DIRECTORY: &str = "/etc/carbide";
-const DEFAULT_DATA_DIRECTORY: &str = "/local/carbide";
+const DEFAULT_DATA_DIRECTORY: &str = "/var/lib/carbide";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let matches = cli::get_matches();
@@ -26,21 +31,56 @@ fn main() -> Result<(), Box<dyn Error>> {
             );
 
             let config = lua::parse_config(&config_directory)?;
-            let current_generation =
-                generations::models::Generation::from_lua_config(&config, 0, &Local::now())?;
 
-            match generations::read_last_generation(&data_directory) {
-                Ok(last_generation) => {
-                    current_generation.write(
-                        &data_directory.join(format!("carbide-{}", last_generation.id + 1)),
-                    )?;
-                }
+            let previous_generation = match generations::read_last_generation(&data_directory) {
+                Ok(previous_generation) => previous_generation,
                 Err(err) => match err.kind() {
-                    io::ErrorKind::NotFound => {
-                        current_generation.write(&data_directory.join("carbide-0"))?;
-                    }
+                    io::ErrorKind::NotFound => generations::models::Generation::new(),
                     _ => return Err(Box::new(err)),
                 },
+            };
+
+            let current_generation = generations::models::Generation::from_lua_config(
+                &config,
+                previous_generation.id + 1,
+                &Local::now(),
+            )?;
+
+            current_generation
+                .write(&data_directory.join(format!("carbide-{}", previous_generation.id + 1)))?;
+
+            let difference =
+                difference::differ_generations(&previous_generation, &current_generation);
+
+            for action in &difference.actions {
+                match action {
+                    difference::models::Action::File(file) => match file {
+                        difference::models::File::Create { path, content } => {
+                            println!("[ Creating File ] {}", path.display());
+
+                            let mut file = File::create(&path)?;
+                            file.write_all(content.as_bytes())?;
+                        }
+                        difference::models::File::Update { path, content } => {
+                            println!("[ Updating File ] {}", path.display());
+
+                            let mut file =
+                                OpenOptions::new().write(true).truncate(true).open(&path)?;
+                            file.write_all(content.as_bytes())?;
+                        }
+                        difference::models::File::Delete { path } => {
+                            println!("[ Deleting File ] {}", path.display());
+
+                            remove_file(&path)?;
+                        }
+                    },
+                    difference::models::Action::Script(script) => {
+                        for command in script {
+                            println!("[ Running Command ]");
+                            println!("{}", command)
+                        }
+                    }
+                }
             }
         }
         Some(("generation", subcommand)) => match subcommand.subcommand() {
